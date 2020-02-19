@@ -43,14 +43,10 @@ class Node:
         return s
 
 
+
 if __name__ == "__main__":
     my_node = Node("(+ 2 3)")
     print(my_node)
 
 
 
-
-
-
-if __name__ == '__main__':
-    parser = Parser()
