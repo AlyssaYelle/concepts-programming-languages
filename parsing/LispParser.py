@@ -39,7 +39,7 @@ class Parser:
 
         # handle possibility that code is a single non-token string
         if code.replace(' ', '') == code:
-            return LiteralNode(code)
+            return LiteralNode(code[1:-1])
 
         # if code is wrapped in parens we want to parse what is in between
         if code[0] == '(':
@@ -142,8 +142,16 @@ class AbstractSyntaxTree:
         self.root = []
     
 
-    # def addNode(self, node):
-    #     self.root.append(node)
+    def evaluate_tree(self):
+        '''
+        TODO
+        evaluates tree to return a singular value
+        '''
+        
+
+        # i think if we evaluate the root then we successfully evaluate entire tree
+        return self.root.evaluate_node()
+
 
 
     def __str__(self):
@@ -158,19 +166,64 @@ class Node:
     def __init__(self):
         pass
 
+    def evaluate_node(self):
+        raise NotImplementedError
+
 
     # return a string representation of a link
     def __str__(self):
         raise NotImplementedError
 
 class ExpressionNode(Node):
+    '''
+    an expression node has a token which states which operatation to perform
+    and a list of children which the operation will be performed on
+    '''
 
     def __init__(self, token):
         super()
         self.token = token
         self.children = []
 
+
+    def evaluate_node(self):
+        '''
+        TODO
+        evaluates single node and returns a single value (or eventually, object)
+        '''
+
+        # evaluate children
+        evaluated_children = []
+
+        # loop over children and call their evaluate node method
+        for child in self.children:
+            evaluated_children.append(child.evaluate_node())
+
+
+
+        # check if token is an operator and if so, perform operation on children
+        # otherwise return -1 for now until we are able to extend method
+        if self.token in ['+', '-', '*', '/']:
+
+            # if it's + then we add two tokens
+            if self.token == '+':
+                return sum(evaluated_children)
+
+            # TODO -, *, /
+
+        elif self.token == 'list':
+            #print('I am printing out', evaluated_children)
+            return evaluated_children
+
+
+        return -1
+
+
+
     def __str__(self):
+        '''
+        builds a string representation of class object
+        '''
         out = '["' + self.token + '"'
 
         for child in self.children:
@@ -182,13 +235,28 @@ class ExpressionNode(Node):
 
 
 class LiteralNode(Node):
+    '''
+    literal node contains single instance of data
+    '''
 
     def __init__(self, data):
         super()
         self.data = data
 
+    def evaluate_node(self):
+        '''
+        TODO
+        literal nodes don't really need to be 'evaluated' so I think we can just return data
+        '''
+        print(self.data)
+        return self.data
+
     def __str__(self):
-        return str(self.data)
+        '''
+        returns string representation of data
+        '''
+        # return str(self.data)
+        return self.data
 
 
 
@@ -196,43 +264,56 @@ class LiteralNode(Node):
 
 
 if __name__ == "__main__":
-    #tests
+
+    parser = Parser('(list "taco" "pierogi" 1 2 3)')
+
+    ast = parser.buildAbstractSyntaxTree()
+
+    evaluated_tree = ast.evaluate_tree()
+
+    print(evaluated_tree) # -> ['"taco"', '"pierogi"', 1, 2, 3]
+
+    my_list = ["taco", "pierogi", 1, 2, 3]
+    print(my_list) # -> ['taco', 'pierogi', 1, 2, 3]
+    #tests to make sure tree is getting build successfully
 
 
-    parser1 = Parser('(first (list 1 (+ 2 3) 9))')
-    ast1 = parser1.buildAbstractSyntaxTree()
+    # parser1 = Parser('(first (list 1 (+ 2 3) 9))')
+    # ast1 = parser1.buildAbstractSyntaxTree()
 
-    print('\ninput: (first (list 1 (+ 2 3) 9))')
-    print('expected: ["first", ["list", 1, ["+", 2, 3], 9]]')
-    print('actual: ', ast1)
+    # print('\ninput: (first (list 1 (+ 2 3) 9))')
+    # print('expected: ["first", ["list", 1, ["+", 2, 3], 9]]')
+    # print('actual: ', ast1)
 
-    parser2 = Parser('(list 1 (+ 2 3) 9)')
-    ast2 = parser2.buildAbstractSyntaxTree()
+    # parser2 = Parser('(list 1 (+ 2 3) 9)')
+    # ast2 = parser2.buildAbstractSyntaxTree()
 
-    print('\ninput: (list 1 (+ 2 3) 9)')
-    print('expected: ["list", 1, ["+", 2, 3], 9]')
-    print('actual: ', ast2)
+    # print('\ninput: (list 1 (+ 2 3) 9)')
+    # print('expected: ["list", 1, ["+", 2, 3], 9]')
+    # print('actual: ', ast2)
 
-    parser3 = Parser('(+ 2 3)')
-    ast3 = parser3.buildAbstractSyntaxTree()
+    # parser3 = Parser('(+ 2 3)')
+    # ast3 = parser3.buildAbstractSyntaxTree()
 
-    print('\ninput: (+ 2 3)')
-    print('expected: ["+", 2, 3]')
-    print('actual: ', ast3)
+    # print('\ninput: (+ 2 3)')
+    # print('expected: ["+", 2, 3]')
+    # print('actual: ', ast3)
 
-    parser4 = Parser('(list (+ 2 3))')
-    ast4 = parser4.buildAbstractSyntaxTree()
+    # parser4 = Parser('(list (+ 2 3))')
+    # ast4 = parser4.buildAbstractSyntaxTree()
 
-    print('\ninput: (list (+ 2 3))')
-    print('expected: ["list", ["+", 2, 3]]')
-    print('actual: ', ast4)
+    # print('\ninput: (list (+ 2 3))')
+    # print('expected: ["list", ["+", 2, 3]]')
+    # print('actual: ', ast4)
 
-    parser5 = Parser('(list "taco" "pierogi")')
-    ast5 = parser5.buildAbstractSyntaxTree()
+    # parser5 = Parser('(list "taco" "pierogi")')
+    # ast5 = parser5.buildAbstractSyntaxTree()
 
-    print('\ninput: (list "taco" "pierogi")')
-    print('expected: ["list", "taco", "pierogi"')
-    print("actual: ", ast5)
+    # print('\ninput: (list "taco" "pierogi")')
+    # print('expected: ["list", "taco", "pierogi"')
+    # print("actual: ", ast5)
+
+
 
     
 
