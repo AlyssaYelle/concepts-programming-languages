@@ -35,7 +35,7 @@ class Parser:
 
         # if code is a single number, return it as a literal node
         if code.isnumeric():
-            return LiteralNode(int(code))
+            return LiteralNode(int(code)) # prob should update this to handle floats
 
         # handle possibility that code is a single non-token string
         if code.replace(' ', '') == code:
