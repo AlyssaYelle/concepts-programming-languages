@@ -38,7 +38,7 @@ class Parser:
             return LiteralNode(int(code)) # prob should update this to handle floats
 
         # handle possibility that code is a single non-token string
-        if code.replace(' ', '') == code:
+        if (code[0] in ['"', "'"]) and (code[-1] in ['"', "'"]):
             return LiteralNode(code[1:-1])
 
         # if code is wrapped in parens we want to parse what is in between
